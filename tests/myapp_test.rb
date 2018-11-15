@@ -11,11 +11,15 @@ class HomepageTest < Test::Unit::TestCase
     MyApp.new(Main.new)
   end
 
-  # def test_response_is_200
-  #   header "Authorization", "Bearer "
-  #   get '/'
-  #   assert last_response.status == 200
-  # end
+  def test_response_is_401
+    get '/'
+    assert last_response.status == 401
+  end
 
+  def test_response_is_200
+    header  "Authorization", "Bearer "
+    get '/'
+    assert last_response.status == 200
+  end
 end
 
