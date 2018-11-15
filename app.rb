@@ -5,14 +5,15 @@ class MyApp
   end
 
   def call(env)
+    @env = env
     status, @header, body = @app.call(env)
-    [new_status, @header, body]
+    [new_status, @header, body ]
   end
 
   private
 
   def token_present?
-    @header.keys.include?("Authorization")
+    @env["HTTP_AUTHORIZATION"] =~ /^Bearer /
   end
 
   def new_status
