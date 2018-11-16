@@ -12,12 +12,19 @@ class MyApp
 
   private
 
-  def token_present?
-    @env["HTTP_AUTHORIZATION"] =~ /^Bearer /
+  def token
+    @env["HTTP_AUTHORIZATION"].gsub('Bearer ', '')
+  end
+
+  def decode
+    begin
+      JWT.decode(token, 'my$ecretK3y', true, { :algorithm => 'HS256' })
+    rescue
+    end
   end
 
   def new_status
-    token_present? ? 200 : 401
+    decode ? 200 : 401
   end
 end
 
