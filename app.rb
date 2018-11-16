@@ -1,3 +1,5 @@
+require 'jwt'
+
 class MyApp
 
   def initialize(app)
@@ -6,8 +8,8 @@ class MyApp
 
   def call(env)
     @env = env
-    status, @header, body = @app.call(env)
-    [new_status, @header, body ]
+    status, header, body = @app.call(env)
+    [new_status, header, body ]
   end
 
   private
@@ -18,7 +20,7 @@ class MyApp
 
   def decode
     begin
-      JWT.decode(token, 'my$ecretK3y', true, { :algorithm => 'HS256' })
+      JWT.decode(token, 'my$ecretK3y', true, { algorithm: 'HS256' })
     rescue
     end
   end
