@@ -1,8 +1,9 @@
 require_relative '../main'
 require_relative '../app'
 
-require "test/unit"
-require "rack/test"
+require 'test/unit'
+require 'rack/test'
+require 'jwt'
 
 class HomepageTest < Test::Unit::TestCase
   include Rack::Test::Methods
@@ -11,24 +12,32 @@ class HomepageTest < Test::Unit::TestCase
     MyApp.new(Main.new)
   end
 
-  def test_without_token
-    get '/'
-
-    assert last_response.status == 401
+  def setup
+    @payload = { user: 1 }
+    @algo    = 'HS256'
+    @secret = "#{ENV["HMAC_SECRET"]}"
   end
 
-  def test_token_with_the_wrong_secret_key
-    header  "Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.rnOIgq7Ns429jktYhR5anXhGHUBVdElXC5WB2u75jss"
+  def test_without_token_response_is_401
     get '/'
 
-    assert last_response.status == 401
+    assert_equal 401, last_response.status
   end
 
-  def test_token_with_the_correct_secret_key
-    header  "Authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.KsCJ93f7pOyW1CaMCUqtFzVpiX7SaoaOIBqikbe9n_w"
+  def test_token_with_the_wrong_secret_key_response_is_401
+    token = JWT.encode @payload, 'something else', @algo
+    header  'Authorization', "Bearer #{token}"
     get '/'
 
-    assert last_response.status == 200
+    assert_equal 401, last_response.status
+  end
+
+  def test_token_with_the_correct_secret_key_response_is_200
+    token = JWT.encode @payload, @secret, @algo
+    header  'Authorization', "Bearer #{token}"
+    get '/'
+
+    assert_equal 200, last_response.status
   end
 end
 

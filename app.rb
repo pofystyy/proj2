@@ -2,6 +2,8 @@ require 'jwt'
 
 class MyApp
 
+  HMAC_SECRET = "#{ENV["HMAC_SECRET"]}"
+
   def initialize(app)
     @app = app
   end
@@ -14,15 +16,18 @@ class MyApp
 
   private
 
+  def token_present?
+    @env["HTTP_AUTHORIZATION"] =~ /^Bearer /
+  end
+
   def token
-    @env["HTTP_AUTHORIZATION"].gsub('Bearer ', '')
+    @env["HTTP_AUTHORIZATION"].gsub('Bearer ', '') if token_present?
   end
 
   def decode
-    begin
-      JWT.decode(token, 'my$ecretK3y', true, { algorithm: 'HS256' })
-    rescue
-    end
+    JWT.decode(token, HMAC_SECRET, true, { algorithm: 'HS256' })
+  rescue JWT::DecodeError
+      false
   end
 
   def new_status
