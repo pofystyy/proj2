@@ -13,9 +13,9 @@ class HomepageTest < Test::Unit::TestCase
   end
 
   def setup
-    @payload = { user: 1 }
+    @payload = { "user": 1 }
     @algo    = 'HS256'
-    @secret = "#{ENV["HMAC_SECRET"]}"
+    @secret  = "#{ENV["HMAC_SECRET"]}"
   end
 
   def test_without_token_response_is_401
