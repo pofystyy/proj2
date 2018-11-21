@@ -22,7 +22,7 @@ class MyApp
   end
 
  def safe_path?
-    white_list.include?(@env["PATH_INFO"])
+    white_list.values.include?(@env["PATH_INFO"])
   end
 
   def token_present?
