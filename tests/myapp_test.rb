@@ -18,6 +18,24 @@ class HomepageTest < Test::Unit::TestCase
     @secret  = "#{ENV["HMAC_SECRET"]}"
   end
 
+  def test_the_path_in_white_list_response_is_200
+    get '/signup'
+
+    assert_equal 200, last_response.status
+  end
+
+  def test_the_path_in_white_list_v2_response_is_200
+    get '/countries'
+
+    assert_equal 200, last_response.status
+  end
+
+    def test_the_path_is_not_white_list_response_is_401
+    get '/something_else'
+
+    assert_equal 401, last_response.status
+  end
+
   def test_without_token_response_is_401
     get '/'
 
@@ -40,4 +58,3 @@ class HomepageTest < Test::Unit::TestCase
     assert_equal 200, last_response.status
   end
 end
-
