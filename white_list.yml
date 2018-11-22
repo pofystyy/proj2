@@ -1,3 +1,5 @@
-auth: /signup
+auth:
+  - /signup
 
-resources: /countries
+resources:
+  - /countries

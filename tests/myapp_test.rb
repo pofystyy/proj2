@@ -1,6 +1,7 @@
 require_relative '../main'
 require_relative '../app'
 
+require 'pry'
 require 'test/unit'
 require 'rack/test'
 require 'jwt'

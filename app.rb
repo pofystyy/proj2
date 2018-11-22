@@ -21,11 +21,11 @@ class MyApp
     YAML.load_file('white_list.yml')
   end
 
- def safe_path?
+  def safe_path?
     host = @env["HTTP_HOST"].scan(/^\w+/).join
     path = @env["PATH_INFO"].scan(/\/\w+$/).join
 
-    white_list.assoc(host).include?(path)
+    white_list.assoc(host)[1].include?(path) if white_list.keys.include?(host)
   end
 
   def token_present?
