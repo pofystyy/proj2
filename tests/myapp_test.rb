@@ -37,6 +37,14 @@ class HomepageTest < Test::Unit::TestCase
     assert_equal 401, last_response.status
   end
 
+  def test_availability_of_the_key_in_header
+    token = JWT.encode @payload, @secret, @algo
+    header  'Authorization', "Bearer #{token}"
+    get 'https://resources.com/'
+
+    assert last_response.header.include?('X-Auth-User')
+  end
+
   def test_token_with_the_wrong_secret_key_response_is_401
     token = JWT.encode @payload, 'something else', @algo
     header  'Authorization', "Bearer #{token}"

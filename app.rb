@@ -11,8 +11,8 @@ class MyApp
 
   def call(env)
     @env = env
-    status, header, body = @app.call(env)
-    [new_status, header, body]
+    status, @header, body = @app.call(env)
+    [new_status, @header, body]
   end
 
   private
@@ -43,7 +43,14 @@ class MyApp
   end
 
   def new_status
-    safe_path? || decode ? 200 : 401
+    if safe_path?
+      200
+    elsif decode
+      @header['X-Auth-User'] = decode.first
+      200
+    else
+      401
+    end
   end
 end
 
