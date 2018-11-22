@@ -22,7 +22,10 @@ class MyApp
   end
 
  def safe_path?
-    white_list.values.include?(@env["PATH_INFO"])
+    host = @env["HTTP_HOST"].scan(/^\w+/).join
+    path = @env["PATH_INFO"].scan(/\/\w+$/).join
+
+    white_list.assoc(host).include?(path)
   end
 
   def token_present?

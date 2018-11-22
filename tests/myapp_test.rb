@@ -19,25 +19,19 @@ class HomepageTest < Test::Unit::TestCase
   end
 
   def test_the_path_in_white_list_response_is_200
-    get '/signup'
+    get 'https://auth.com/signup'
 
     assert_equal 200, last_response.status
   end
 
   def test_the_path_in_white_list_v2_response_is_200
-    get '/countries'
+    get 'https://resources.com/countries'
 
     assert_equal 200, last_response.status
   end
 
-    def test_the_path_is_not_white_list_response_is_401
-    get '/something_else'
-
-    assert_equal 401, last_response.status
-  end
-
   def test_without_token_response_is_401
-    get '/'
+    get 'https://resources.com/'
 
     assert_equal 401, last_response.status
   end
@@ -45,7 +39,7 @@ class HomepageTest < Test::Unit::TestCase
   def test_token_with_the_wrong_secret_key_response_is_401
     token = JWT.encode @payload, 'something else', @algo
     header  'Authorization', "Bearer #{token}"
-    get '/'
+    get 'https://resources.com/'
 
     assert_equal 401, last_response.status
   end
@@ -53,7 +47,7 @@ class HomepageTest < Test::Unit::TestCase
   def test_token_with_the_correct_secret_key_response_is_200
     token = JWT.encode @payload, @secret, @algo
     header  'Authorization', "Bearer #{token}"
-    get '/'
+    get 'https://resources.com/'
 
     assert_equal 200, last_response.status
   end
