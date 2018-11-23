@@ -17,17 +17,17 @@ class MyApp
   private
 
   def response
-    @resp = Rack::Response.new
+    response = Rack::Response.new
 
     if safe_path?
-      @resp.status = 200
+      response.status = 200
     elsif decode
-      @resp['X-Auth-User'] = decode.first
-      @resp.status = 200
+      response['X-Auth-User'] = decode.first
+      response.status = 200
     else
-      @resp.status = 401
+      response.status = 401
     end
-    @resp.finish
+    response.finish
   end
 
   def white_list
