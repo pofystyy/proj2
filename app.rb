@@ -3,7 +3,11 @@ require 'yaml'
 
 class MyApp
 
-  HMAC_SECRET = "#{ENV["HMAC_SECRET"]}"
+  HMAC_SECRET  = "#{ENV["HMAC_SECRET"]}"
+
+  # HTTP Status Codes
+  UNAUTHORIZED = 401
+  OK           = 200
 
   def initialize(app)
     @app = app
@@ -18,14 +22,15 @@ class MyApp
 
   def response
     response = Rack::Response.new
+    payload = decode
 
     if safe_path?
-      response.status = 200
-    elsif decode
-      response['X-Auth-User'] = decode.first
-      response.status = 200
+      response.status = OK
+    elsif payload
+      response['X-Auth-User'] = payload
+      response.status = OK
     else
-      response.status = 401
+      response.status = UNAUTHORIZED
     end
     response.finish
   end
@@ -38,7 +43,7 @@ class MyApp
     host = @env["HTTP_HOST"].scan(/^\w+/).join
     path = @env["PATH_INFO"].scan(/\/\w+$/).join
 
-    white_list.assoc(host)[1].include?(path) if white_list.keys.include?(host)
+    white_list[host].include?(path) if white_list.keys.include?(host)
   end
 
   def token_present?
@@ -50,7 +55,7 @@ class MyApp
   end
 
   def decode
-    JWT.decode(token, HMAC_SECRET, true, { algorithm: 'HS256' })
+    JWT.decode(token, HMAC_SECRET, true, { algorithm: 'HS256' }).first
   rescue JWT::DecodeError
     false
   end
