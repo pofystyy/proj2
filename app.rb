@@ -11,11 +11,24 @@ class MyApp
 
   def call(env)
     @env = env
-    status, @header, body = @app.call(env)
-    [new_status, @header, body]
+    response
   end
 
   private
+
+  def response
+    @resp = Rack::Response.new
+
+    if safe_path?
+      @resp.status = 200
+    elsif decode
+      @resp['X-Auth-User'] = decode.first
+      @resp.status = 200
+    else
+      @resp.status = 401
+    end
+    @resp.finish
+  end
 
   def white_list
     YAML.load_file('white_list.yml')
@@ -40,17 +53,6 @@ class MyApp
     JWT.decode(token, HMAC_SECRET, true, { algorithm: 'HS256' })
   rescue JWT::DecodeError
     false
-  end
-
-  def new_status
-    if safe_path?
-      200
-    elsif decode
-      @header['X-Auth-User'] = decode.first
-      200
-    else
-      401
-    end
   end
 end
 
