@@ -1,5 +1,8 @@
-auth:
-  - /signup
+auth.com:
+  - target: signup
+    method: [GET]
 
-resources:
-  - /countries
+resources.com:
+  - target: countries
+    method: [GET, POST]
+

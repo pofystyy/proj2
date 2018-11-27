@@ -24,7 +24,7 @@ class MyApp
     response = Rack::Response.new
     payload = decode
 
-    if safe_path?
+    if valid_data?
       response.status = OK
     elsif payload
       response['X-Auth-User'] = payload
@@ -39,11 +39,31 @@ class MyApp
     YAML.load_file('white_list.yml')
   end
 
-  def safe_path?
-    host = @env["HTTP_HOST"].scan(/^\w+/).join
-    path = @env["PATH_INFO"].scan(/\/\w+$/).join
+  def valid_data?
+    arr = comparative_keys.map do |meth|
+      (allowable_values[meth] & (meth == 'target' ? host_data[0][meth].split : host_data[0][meth]))
+    end.delete_if {|el| el.empty? }
 
-    white_list[host].include?(path) if white_list.keys.include?(host)
+    arr.size == comparative_keys.size
+  end
+
+  def host_data
+    host = @env["HTTP_HOST"]
+
+    white_list[host] if white_list.keys.include?(host)
+  end
+
+  def allowable_values
+    path = @env["PATH_INFO"].split("/")
+    meth = @env["REQUEST_METHOD"].split
+
+    { 'target' => path,
+      'method' => meth
+     }
+  end
+
+  def comparative_keys
+    host_data[0].keys & allowable_values.keys
   end
 
   def token_present?

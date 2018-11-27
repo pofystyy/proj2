@@ -25,15 +25,33 @@ class HomepageTest < Test::Unit::TestCase
   end
 
   def test_the_path_in_white_list_response_is_200
-    get 'https://auth.com/signup'
+    get 'https://auth.com/signup/name'
 
     assert_equal 200, last_response.status
   end
 
+  def test_the_method_not_in_white_list_response_is_401
+    post 'https://auth.com/signup/name'
+
+    assert_equal 401, last_response.status
+  end
+
   def test_the_path_in_white_list_v2_response_is_200
-    get 'https://resources.com/countries'
+    get 'https://resources.com/countries/uk'
 
     assert_equal 200, last_response.status
+  end
+
+  def test_the_path_and_method_in_white_list_v2_response_is_200
+    post 'https://resources.com/countries'
+
+    assert_equal 200, last_response.status
+  end
+
+  def test_the_path_without_method_in_white_list_v2_response_is_401
+    post 'https://auth.com/signup'
+
+    assert_equal 401, last_response.status
   end
 
   def test_without_token_response_is_401
