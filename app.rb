@@ -1,13 +1,16 @@
-require 'jwt'
-require 'yaml'
+require_relative 'config'
+require_relative 'token_validator'
+require_relative 'white_list_validator'
 
 class MyApp
 
-  HMAC_SECRET  = "#{ENV["HMAC_SECRET"]}"
+  include Config
+  include TokenValidator
+  include WhiteListValidator
 
   # HTTP Status Codes
-  UNAUTHORIZED = 401
   OK           = 200
+  UNAUTHORIZED = 401
 
   def initialize(app)
     @app = app
@@ -34,50 +37,4 @@ class MyApp
     end
     response.finish
   end
-
-  def white_list
-    YAML.load_file('white_list.yml')
-  end
-
-  def valid_data?
-    arr = comparative_keys.map do |meth|
-      (allowable_values[meth] & (meth == 'target' ? host_data[0][meth].split : host_data[0][meth]))
-    end.delete_if {|el| el.empty? }
-
-    arr.size == comparative_keys.size
-  end
-
-  def host_data
-    host = @env["HTTP_HOST"]
-
-    white_list[host] if white_list.keys.include?(host)
-  end
-
-  def allowable_values
-    path = @env["PATH_INFO"].split("/")
-    meth = @env["REQUEST_METHOD"].split
-
-    { 'target' => path,
-      'method' => meth
-     }
-  end
-
-  def comparative_keys
-    host_data[0].keys & allowable_values.keys
-  end
-
-  def token_present?
-    @env["HTTP_AUTHORIZATION"] =~ /^Bearer /
-  end
-
-  def token
-    @env["HTTP_AUTHORIZATION"].gsub('Bearer ', '') if token_present?
-  end
-
-  def decode
-    JWT.decode(token, HMAC_SECRET, true, { algorithm: 'HS256' }).first
-  rescue JWT::DecodeError
-    false
-  end
 end
-
