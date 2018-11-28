@@ -1,35 +1,51 @@
 module WhiteListValidator
 
-  def valid_data?
-    methods_for_comparison.size == comparative_keys.size
+  def host_in_white_list?
+    white_list.keys.include?(host)
+  end
+
+  def valid?
+    host_values.size == coincidence.size
+  end
+
+  private
+
+  def host
+    @env["HTTP_HOST"]
+  end
+
+  def host_values
+    host_data.values.map { |value| value.class == Array ? value : value.split }
   end
 
   def host_data
-    host = @env["HTTP_HOST"]
-
-    white_list[host] if white_list.keys.include?(host)
+    white_list.dig(host, 0)
   end
 
-  def allowable_values
-    path = @env["PATH_INFO"].split("/")
-    meth = @env["REQUEST_METHOD"].split
+  def coincidence
+    data_for_check.map.with_index { |arr, index| arr & host_values[index]}.reject(&:empty?)
+  end
 
-    { 'target' => path,
-      'method' => meth
+  def data_for_check
+    keys_for_check.map{|key| env_data[key]}
+  end
+
+  def keys_for_check
+    host_data.keys & env_data.keys
+  end
+
+  def env_data
+    {
+      'target' => path,
+      'method' => http_method
      }
   end
 
-  def comparative_keys
-    host_data[0].keys & allowable_values.keys
+  def path
+    @env["PATH_INFO"].split('/')
   end
 
-  def methods_for_comparison
-    comparative_keys.map do |method|
-      allowable_values[method] & array(method)
-    end.delete_if {|el| el.empty? }
-  end
-
-  def array(method)
-    host_data[0][method].class == Array ? host_data[0][method] : host_data[0][method].split
+  def http_method
+    @env["REQUEST_METHOD"].split
   end
 end

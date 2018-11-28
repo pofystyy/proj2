@@ -1,6 +1,6 @@
 auth.com:
   - target: signup
-    method: [GET]
+    method: GET
 
 resources.com:
   - target: countries

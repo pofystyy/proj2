@@ -27,11 +27,15 @@ class MyApp
     response = Rack::Response.new
     payload = decode
 
-    if valid_data?
-      response.status = OK
-    elsif payload
-      response['X-Auth-User'] = payload
-      response.status = OK
+    if host_in_white_list?
+      if valid?
+        response.status = OK
+      elsif payload
+        response['X-Auth-User'] = payload
+        response.status = OK
+      else
+        response.status = UNAUTHORIZED
+      end
     else
       response.status = UNAUTHORIZED
     end

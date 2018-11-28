@@ -48,12 +48,6 @@ class HomepageTest < Test::Unit::TestCase
     assert_equal 200, last_response.status
   end
 
-  def test_the_path_without_method_in_white_list_v2_response_is_401
-    post 'https://auth.com/signup'
-
-    assert_equal 401, last_response.status
-  end
-
   def test_without_token_response_is_401
     get @default_url
 
@@ -74,17 +68,17 @@ class HomepageTest < Test::Unit::TestCase
     assert_equal @payload, last_response.header['X-Auth-User']
   end
 
-  def test_token_with_the_wrong_secret_key_response_is_401
-    header 'Authorization', "Bearer #{@invalid_token}"
-    get @default_url
-
-    assert_equal 401, last_response.status
-  end
-
   def test_token_with_the_correct_secret_key_response_is_200
     header 'Authorization', "Bearer #{@valid_token}"
     get @default_url
 
     assert_equal 200, last_response.status
+  end
+
+  def test_token_with_the_wrong_secret_key_response_is_401
+    header 'Authorization', "Bearer #{@invalid_token}"
+    get @default_url
+
+    assert_equal 401, last_response.status
   end
 end
