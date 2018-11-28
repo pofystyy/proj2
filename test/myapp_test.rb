@@ -1,5 +1,5 @@
-require_relative '../main'
-require_relative '../app'
+require_relative '../lib/main'
+require_relative '../lib/app'
 
 require 'pry'
 require 'test/unit'

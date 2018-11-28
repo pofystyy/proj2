@@ -1,6 +1,10 @@
 require 'jwt'
 
-module TokenValidator
+class TokenValidator
+
+  def initialize(env)
+    @env = env
+  end
 
   def secret
     "#{ENV["HMAC_SECRET"]}"

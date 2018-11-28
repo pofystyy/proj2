@@ -1,10 +1,15 @@
-module WhiteListValidator
+class WhiteListValidator
 
-  def host_in_white_list?
-    white_list.keys.include?(host)
+  def initialize(env)
+    @env = env
+    @white_list = Config.new.white_list
   end
 
-  def valid?
+  def host_in_white_list?
+    @white_list.keys.include?(host)
+  end
+
+  def host_valid?
     host_values.size == coincidence.size
   end
 
@@ -19,7 +24,7 @@ module WhiteListValidator
   end
 
   def host_data
-    white_list.dig(host, 0)
+    @white_list.dig(host, 0)
   end
 
   def coincidence

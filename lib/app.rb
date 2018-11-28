@@ -1,12 +1,8 @@
-require_relative 'config'
+require_relative '../config/config'
 require_relative 'token_validator'
 require_relative 'white_list_validator'
 
 class MyApp
-
-  include Config
-  include TokenValidator
-  include WhiteListValidator
 
   # HTTP Status Codes
   OK           = 200
@@ -24,11 +20,14 @@ class MyApp
   private
 
   def response
-    response = Rack::Response.new
-    payload = decode
+    response             = Rack::Response.new
+    token_validator      = TokenValidator.new(@env)
+    white_list_validator = WhiteListValidator.new(@env)
 
-    if host_in_white_list?
-      if valid?
+    payload = token_validator.decode
+
+    if white_list_validator.host_in_white_list?
+      if white_list_validator.host_valid?
         response.status = OK
       elsif payload
         response['X-Auth-User'] = payload

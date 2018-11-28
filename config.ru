@@ -1,5 +1,5 @@
-require './main'
-require './app'
+require './lib/main'
+require './lib/app'
 
 use Rack::Reloader
 use MyApp
