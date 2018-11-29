@@ -1,8 +1,11 @@
 class WhiteListValidator
+  attr_reader :host, :path, :http_method
 
-  def initialize(env)
-    @env = env
+  def initialize(host:, path:, http_method:)
     @white_list = Config.new.white_list
+    @host = host
+    @path = path
+    @http_method = http_method
   end
 
   def host_in_white_list?
@@ -15,12 +18,8 @@ class WhiteListValidator
 
   private
 
-  def host
-    @env["HTTP_HOST"]
-  end
-
   def host_values
-    host_data.values.map { |value| value.class == Array ? value : value.split }
+    host_data.values.map { |value| value.is_a?(Array) ? value : value.split }
   end
 
   def host_data
@@ -42,15 +41,7 @@ class WhiteListValidator
   def env_data
     {
       'target' => path,
-      'method' => http_method
+      'method' => [http_method]
      }
-  end
-
-  def path
-    @env["PATH_INFO"].split('/')
-  end
-
-  def http_method
-    @env["REQUEST_METHOD"].split
   end
 end

@@ -14,30 +14,31 @@ class MyApp
 
   def call(env)
     @env = env
+    @response             = Rack::Response.new
+    @white_list_validator = WhiteListValidator.new host:        @env['HTTP_HOST'],
+                                                   path:        @env["PATH_INFO"].split('/'),
+                                                   http_method: @env["REQUEST_METHOD"]
+
     response
   end
 
   private
 
+  def token
+    @env["HTTP_AUTHORIZATION"]&.gsub('Bearer ', '')
+  end
+
+   def white_list_resp
+      payload = TokenValidator.decode(token)
+      @response.status = OK if @white_list_validator.host_valid? || payload
+      @response['X-Auth-User'] = payload
+   end
+
   def response
-    response             = Rack::Response.new
-    token_validator      = TokenValidator.new(@env)
-    white_list_validator = WhiteListValidator.new(@env)
+    @response.status = UNAUTHORIZED
 
-    payload = token_validator.decode
+    white_list_resp if @white_list_validator.host_in_white_list?
 
-    if white_list_validator.host_in_white_list?
-      if white_list_validator.host_valid?
-        response.status = OK
-      elsif payload
-        response['X-Auth-User'] = payload
-        response.status = OK
-      else
-        response.status = UNAUTHORIZED
-      end
-    else
-      response.status = UNAUTHORIZED
-    end
-    response.finish
+    @response.finish
   end
 end
